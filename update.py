@@ -180,7 +180,7 @@ if __name__ == "__main__":
                     count_removed = clean_records(cfg, cfg['domain'], subdomain, a_records[1:])
                     log.info(f"Cleaned up {count_removed} A records in {fqdn}")
 
-                if len(a_records) == 0:
+                elif len(a_records) == 0:
                     if add_record(cfg, cfg['domain'], subdomain, new_ip):
                         log.info(f"Added a new A record for {new_ip} in {fqdn}")
                         exit(0)
@@ -188,10 +188,11 @@ if __name__ == "__main__":
                         log.critical(f"Unable to create record in {fqdn}, exiting")
                         exit(2)
 
-                if update_record(cfg, cfg['domain'], subdomain, new_ip, a_records[0]):
-                    log.info(f"Updated the A record for {new_ip} in {fqdn}")
                 else:
-                    log.info(f"A records for {fqdn} already up to date")
+                    if update_record(cfg, cfg['domain'], subdomain, new_ip, a_records[0]):
+                        log.info(f"Updated the A record for {new_ip} in {fqdn}")
+                    else:
+                        log.info(f"A records for {fqdn} already up to date")
             except Exception as e:
                 log.critical(e)
                 raise
