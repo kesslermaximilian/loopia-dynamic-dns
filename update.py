@@ -20,6 +20,7 @@ __email__ = "jonas[dot]werme[at]hoofbite[dot]com"
 __status__ = "Prototype"
 
 import xmlrpc.client
+import sys
 
 from requests import get
 
@@ -147,9 +148,12 @@ def update_record(config: dict, domain: str, subdomain: str, ip: str, record: di
 
 
 if __name__ == "__main__":
+    cfg_file = 'config.yml'
+    if len(sys.argv) > 1:
+        cfg_file = sys.argv[1]
 
     try:
-        cfg = yaml_config_to_dict(expected_keys=["username", "password", "domain", "subdomains"])
+        cfg = yaml_config_to_dict(expected_keys=["username", "password", "domain", "subdomains"], config_file=cfg_file)
         log = get_logger(
             name=__name__,
             log_level_console=cfg["log_level_console"],

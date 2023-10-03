@@ -16,8 +16,10 @@ DNS update script for loopia.se. Allows automatic update of a DNS record directl
 ## Usage
 
 ```python
-Usage: python update.py
+Usage: python update.py [CONFIG_FILE]
 ```
+
+If not specified, `CONFIG_FILE` defaults to `config.yml` in the working directory.
 
 ## Setup
 
