@@ -154,6 +154,7 @@ if __name__ == "__main__":
             name=__name__,
             log_level_console=cfg["log_level_console"],
             log_level_file=cfg["log_level_file"],
+            log_file=cfg["log_file"]
         )
 
         log.debug("Configuration and logging initialized")
