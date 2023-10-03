@@ -27,7 +27,7 @@ from config import yaml_config_to_dict
 from logger import get_logger
 
 
-def clean_records(config: dict, zone_records) -> int:
+def clean_records(config: dict, domain: str, subdomain: str, zone_records) -> int:
     """Remove all A records except the first one"""
 
     count = 0
@@ -35,8 +35,8 @@ def clean_records(config: dict, zone_records) -> int:
         status = client.removeZoneRecord(
             config["username"],
             config["password"],
-            config["domain"],
-            config["subdomain"],
+            domain,
+            subdomain,
             record["record_id"],
         )
 
@@ -54,18 +54,18 @@ def get_ip():
     return get("https://api.ipify.org/").content.decode("utf8")
 
 
-def get_records(config: dict, record_type: list = ["A"]) -> list:
+def get_records(config, domain: str, subdomain: str, record_type: list = ["A"]) -> list:
     """Get current A records for a subdomain in a zone"""
 
-    if not config:
+    if not config or not domain:
         raise ValueError("Missing or invalid configuration parameters")
 
     try:
         zone_records: list = client.getZoneRecords(
             config["username"],
             config["password"],
-            config["domain"],
-            config["subdomain"],
+            domain,
+            subdomain
         )
 
         if "AUTH_ERROR" in zone_records:
@@ -86,10 +86,10 @@ def get_records(config: dict, record_type: list = ["A"]) -> list:
         raise
 
 
-def add_record(config: dict, ip: str) -> bool:
+def add_record(config: dict, domain: str, subdomain: str, ip: str) -> bool:
     """Add a new A record to a subdomains in a zone"""
 
-    if not config or ip == "":
+    if not config or not domain or not subdomain or ip == "":
         raise ValueError("Missing or invalid configuration parameters")
 
     new_record = {
@@ -103,8 +103,8 @@ def add_record(config: dict, ip: str) -> bool:
         status = client.addZoneRecord(
             config["username"],
             config["password"],
-            config["domain"],
-            config["subdomain"],
+            domain,
+            subdomain,
             new_record,
         )
         if status == "OK":
@@ -115,7 +115,7 @@ def add_record(config: dict, ip: str) -> bool:
         raise
 
 
-def update_record(config: dict, ip: str, record: dict) -> int:
+def update_record(config: dict, domain: str, subdomain: str, ip: str, record: dict) -> int:
     """Update an existing A record for a subdomain in a zone"""
 
     if record["rdata"] == new_ip and int(record["ttl"]) == int(config["ttl"]):
@@ -132,8 +132,8 @@ def update_record(config: dict, ip: str, record: dict) -> int:
         status = client.updateZoneRecord(
             config["username"],
             config["password"],
-            config["domain"],
-            config["subdomain"],
+            domain,
+            subdomain,
             new_record,
         )
 
@@ -149,7 +149,7 @@ def update_record(config: dict, ip: str, record: dict) -> int:
 if __name__ == "__main__":
 
     try:
-        cfg = yaml_config_to_dict(expected_keys=["username", "password", "domain", "subdomain"])
+        cfg = yaml_config_to_dict(expected_keys=["username", "password", "domain", "subdomains"])
         log = get_logger(
             name=__name__,
             log_level_console=cfg["log_level_console"],
@@ -162,34 +162,35 @@ if __name__ == "__main__":
         client = xmlrpc.client.ServerProxy(uri="https://api.loopia.se/RPCSERV", encoding="utf-8")
         log.debug("Client initialized")
 
-        a_records = get_records(cfg, record_type=["A"])
-        log.debug(f"Found {len(a_records)} A records")
-
         new_ip = get_ip()
         log.debug(f"Current public ip is {new_ip}")
 
-        fqdn = cfg["domain"] if cfg["subdomain"] == "@" else f"{cfg['subdomain']}.{cfg['domain']}"
+        for subdomain in cfg['subdomains']:
+            fqdn = cfg["domain"] if subdomain == "@" else f"{subdomain}.{cfg['domain']}"
 
-        try:
-            if len(a_records) > 1:
-                count_removed = clean_records(cfg, a_records[1:])
-                log.info(f"Cleaned up {count_removed} A records in {fqdn}")
+            a_records = get_records(cfg, cfg['domain'], subdomain, record_type=["A"])
+            log.debug(f"Found {len(a_records)} A records in {fqdn}.")
 
-            if len(a_records) == 0:
-                if add_record(cfg, new_ip):
-                    log.info(f"Added a new A record for {new_ip} in {fqdn}")
-                    exit(0)
+            try:
+                if len(a_records) > 1:
+                    count_removed = clean_records(cfg, cfg['domain'], subdomain, a_records[1:])
+                    log.info(f"Cleaned up {count_removed} A records in {fqdn}")
+
+                if len(a_records) == 0:
+                    if add_record(cfg, cfg['domain'], subdomain, new_ip):
+                        log.info(f"Added a new A record for {new_ip} in {fqdn}")
+                        exit(0)
+                    else:
+                        log.critical(f"Unable to create record in {fqdn}, exiting")
+                        exit(2)
+
+                if update_record(cfg, cfg['domain'], subdomain, new_ip, a_records[0]):
+                    log.info(f"Updated the A record for {new_ip} in {fqdn}")
                 else:
-                    log.critical("Unable to create record, exiting")
-                    exit(2)
-
-            if update_record(cfg, new_ip, a_records[0]):
-                log.info(f"Updated the A record for {new_ip} in {fqdn}")
-            else:
-                log.info("Already up to date")
-        except Exception as e:
-            log.critical(e)
-            raise
+                    log.info(f"A records for {fqdn} already up to date")
+            except Exception as e:
+                log.critical(e)
+                raise
 
     except Exception as e:
         exit(f"{e}")

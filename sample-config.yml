@@ -4,7 +4,7 @@ username: 'myusername@loopiaapi'
 password: 'mypassword'
 
 domain: 'mindoman.se'
-subdomain: '@'
+subdomains: ['@', 'mysubdomain'] # Use '@' to update the toplvl domain
 ttl: 300 # optional, defaults to 3600
 
 # Log settings
