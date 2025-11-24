@@ -1,0 +1,17 @@
+[Unit]
+Description=Loopia DynDNS
+
+PartOf=loopia.timer
+ReloadPropagatedFrom=loopia.timer
+
+[Service]
+Type=oneshot
+TimeoutStartSec=30
+NotifyAccess=main
+User=loopia
+WorkingDirectory=/var/log/loopia-dynamic-dns
+ExecStart=python /opt/loopia-dynamic-dns/update.py /etc/loopia-dynamic-dns/config.yml
+SyslogIdentifier=loopia-dynamic-dns
+
+[Install]
+WantedBy=loopia.timer
