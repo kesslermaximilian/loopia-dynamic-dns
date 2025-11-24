@@ -9,3 +9,6 @@ install:
 	install -Dm644 config.py $(DESTDIR)/opt/${PKGNAME}/config.py
 	install -Dm644 logger.py $(DESTDIR)/opt/${PKGNAME}/logger.py
 	install -Dm644 LICENSE $(DESTDIR)/usr/share/licenses/${PKGNAME}/LICENSE
+	# Install systemd unit files
+	install -Dm644 systemd/loopia.timer $(DESTDIR)/etc/systemd/system/loopia.timer
+	install -Dm644 systemd/loopia.service $(DESTDIR)/etc/systemd/system/loopia.service
