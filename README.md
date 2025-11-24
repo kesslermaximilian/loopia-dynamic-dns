@@ -13,6 +13,13 @@ DNS update script for loopia.se. Allows automatic update of a DNS record directl
       - [Log levels](#log-levels)
     - [Configuration](#configuration-1)
 
+## Installation
+You can install this to `/opt/loopia-dynamic-dns` using `make install`.
+There is also a PKGBUILD for Arch Linux at [arch/loopia-dynamic-dns-git](https://git.abstractnonsen.se/arch/loopia-dynamic-dns-git).
+
+In the `systemd` folder, you can find example `systemd` configuration files that work with the install from the `Makefile`.
+This enables a 1-minute timer for systemd to regularly run the update scripts.
+
 ## Usage
 
 ```python
