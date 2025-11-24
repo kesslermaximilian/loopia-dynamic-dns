@@ -1,12 +1,9 @@
 PKGNAME=loopia-dynamic-dns
 
 install:
-	# Create log directory
+	# Create log and config directory
 	install -dm755 $(DESTDIR)/var/log/${PKGNAME}
-	# Create config directory. This should not be accessible by world, since it will contain
-	# the credentials for the loopia API.
-	# Make sure this is later owned by the user executing the update script
-	install -dm700 $(DESTDIR)/etc/${PKGNAME}
+	install -dm755 $(DESTDIR)/etc/${PKGNAME}
 	# Copy other files to their locations, also world-readable
 	install -Dm644 update.py $(DESTDIR)/opt/${PKGNAME}/update.py
 	install -Dm644 config.py $(DESTDIR)/opt/${PKGNAME}/config.py
