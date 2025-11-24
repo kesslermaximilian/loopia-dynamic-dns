@@ -23,7 +23,7 @@ If not specified, `CONFIG_FILE` defaults to `config.yml` in the working director
 
 ## Setup
 
-For anyone with some python experience this should be straight forward.
+For anyone with some python experience this should be straight forward:
 
 ### Dependencies
 
@@ -36,7 +36,7 @@ For anyone with some python experience this should be straight forward.
 
 #### Step by step
 
-1. Clone the repo or get the script files to your hard drive in 2ome other way
+1. Clone the repo or get the script files to your hard drive in some other way
 2. Install pre-requisite packages locally or in your virtual environment
 
 ```python
@@ -100,6 +100,6 @@ log_level_console: 20
 
 ### Configuration
 
-The script will be looking for the file config.yml for its' settings.
+The script will be looking for the file config.yml for its' settings if no other filepath was specified.
 
 Copy or rename the sample-config.yml to config.yml and update with your own settings.
