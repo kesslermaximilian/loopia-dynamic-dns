@@ -172,11 +172,20 @@ if __name__ == "__main__":
         log.debug("Client initialized")
 
         ipv4 = get_ip()
-        ipv6 = get_ip6()
+
+        ipv6 = None
+        try:
+            get_ip6()
+        except:
+            log.debug(f"No IPv6")
+
         log.debug(f"Current public ip is {ipv4} / {ipv6}")
 
         for subdomain in cfg['subdomains']:
-            for record_type in ["A", "AAAA"]:
+            records = ["A"]
+            if ipv6 is not None:
+                records += ["AAAA"]
+            for record_type in records:
                 new_ip = ipv6 if record_type == "AAAA" else ipv4
                 fqdn = cfg["domain"] if subdomain == "@" else f"{subdomain}.{cfg['domain']}"
 
